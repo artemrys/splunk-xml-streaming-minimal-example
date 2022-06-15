@@ -1,4 +1,6 @@
+import json
 import sys
+import xml.sax.saxutils as xss
 
 SCHEME = """<scheme>
     <title>XML Streaming minimal example</title>
@@ -22,19 +24,58 @@ def do_scheme():
     print(SCHEME)
 
 
-def run():
-    events = """<stream>
-  <event>
-    <time>1654887496</time>
-    <data>event_status="(0)The operation completed successfully."</data>
-  </event>
-  <event>
-    <time>1654887496</time>
-    <data>event_status="(1)The operation completed successfully."</data>
-  </event>
-</stream>"""
+evt_fmt = (
+    "<stream><event><host>{0}</host>"
+    "<source><![CDATA[{1}]]></source>"
+    "<sourcetype><![CDATA[{2}]]></sourcetype>"
+    "<time>{3}</time>"
+    "<index>{4}</index><data>"
+    # "<![CDATA[{5}]]></data></event></stream>"  # old version
+    "{5}</data></event></stream>"  # new version
+)
 
-    sys.stdout.write(events)
+
+def run():
+    events = []
+    event1 = evt_fmt.format(
+        "localhost",
+        "my_computer",
+        "test:sourcetype",
+        calendar.timegm(datetime.datetime.utcnow().utctimetuple()),
+        "main",
+        xss.escape(json.dumps([{"Data": "Sample1"}, {"Data": "Sample2"}])),
+    )
+    event2 = evt_fmt.format(
+        "localhost",
+        "my_computer",
+        "test:sourcetype",
+        calendar.timegm(datetime.datetime.utcnow().utctimetuple()),
+        "main",
+        xss.escape("let's see what we will have here"),
+    )
+    event3 = evt_fmt.format(
+        "localhost",
+        "my_computer",
+        "test:sourcetype",
+        calendar.timegm(datetime.datetime.utcnow().utctimetuple()),
+        "main",
+        xss.escape("<data>hello world</data>"),
+    )
+    event4 = evt_fmt.format(
+        "localhost",
+        "my_computer",
+        "test:sourcetype",
+        calendar.timegm(datetime.datetime.utcnow().utctimetuple()),
+        "main",
+        xss.escape(json.dumps({"hello": "world"})),
+    )
+    events.append(event1)
+    events.append(event2)
+    events.append(event3)
+    events.append(event4)
+
+    for event in events:
+        sys.stdout.write(event)
     sys.stdout.flush()
 
 
