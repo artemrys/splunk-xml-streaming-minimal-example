@@ -76,6 +76,8 @@ def run():
     events.append(event3)
     events.append(event4)
 
+    import remote_pdb; remote_pdb.RemotePdb(host='0.0.0.0', port=4444).set_trace()
+
     for event in events:
         sys.stdout.write(event)
     sys.stdout.flush()
